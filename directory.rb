@@ -22,13 +22,21 @@ def print_header
   puts "-------------"
 end
 
-def print(students,letter_filter)
+def print(students,filter)
   students.each.with_index(1) do |student,index|
-    if student[:name] =~ /^#{letter_filter}/i
-      puts "#{index}. #{student[:name]} (#{student[:cohort]} cohort)"
+    if filter =~ /^[A-z]+$/ # true if only word
+      @filter_type = "whose names begin with"
+      if student[:name] =~ /^#{filter}/i
+        puts "#{index}. #{student[:name]} (#{student[:cohort]} cohort)"
+      end
+    else
+      @filter_type = "whose names are shorter than"
+      if student[:name].length <= filter.to_i
+        puts "#{index}. #{student[:name]} (#{student[:cohort]} cohort)"
+      end
     end
   end
-  @filter = letter_filter
+  @filter = filter
 end
 
 def print_footer(students,filter)
@@ -36,7 +44,7 @@ def print_footer(students,filter)
 end
 
 def print_filtered_footer(students)
-  puts "These are the great students whose names begin with #{@filter}"
+  puts "These are the great students #{@filter_type} #{@filter}"
 end
 # nothing happens until we call the methods:
 students = input_students
@@ -46,4 +54,6 @@ print_footer(students,"")
 print(students,"a")
 print_filtered_footer(students)
 print(students,"r")
+print_filtered_footer(students)
+print(students,12)
 print_filtered_footer(students)
