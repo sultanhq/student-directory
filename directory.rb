@@ -22,9 +22,11 @@ def print_header
   puts "-------------"
 end
 
-def print(students,filter)
-  students.each.with_index(1) do |student,index|
-    if filter =~ /^[A-z]+$/ # true if only word
+def print(students,offset,filter)
+  students.each.with_index(offset) do |student,index|
+    if filter == ""
+        puts "#{index}. #{student[:name]} (#{student[:cohort]} cohort)"
+    elsif filter =~ /^[A-z]+$/ # true if only word
       @filter_type = "whose names begin with"
       if student[:name] =~ /^#{filter}/i
         puts "#{index}. #{student[:name]} (#{student[:cohort]} cohort)"
@@ -49,11 +51,11 @@ end
 # nothing happens until we call the methods:
 students = input_students
 print_header
-print(students,"")
+print(students,1,"")
 print_footer(students,"")
-print(students,"a")
+print(students,1,"a")
 print_filtered_footer(students)
-print(students,"r")
+print(students,1,"r")
 print_filtered_footer(students)
-print(students,12)
+print(students,1,12)
 print_filtered_footer(students)
