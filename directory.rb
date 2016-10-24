@@ -22,17 +22,28 @@ def print_header
   puts "-------------"
 end
 
-def print(students)
+def print(students,letter_filter)
   students.each.with_index(1) do |student,index|
-    puts "#{index}. #{student[:name]} (#{student[:cohort]} cohort)"
+    if student[:name] =~ /^#{letter_filter}/i
+      puts "#{index}. #{student[:name]} (#{student[:cohort]} cohort)"
+    end
   end
+  @filter = letter_filter
 end
 
-def print_footer(students)
-  puts "Overall, we have #{students.count} great students"
+def print_footer(students,filter)
+  puts "Overall, we have #{students.count} great students#{filter}"
+end
+
+def print_filtered_footer(students)
+  puts "These are the great students whose names begin with #{@filter}"
 end
 # nothing happens until we call the methods:
 students = input_students
 print_header
-print(students)
-print_footer(students)
+print(students,"")
+print_footer(students,"")
+print(students,"a")
+print_filtered_footer(students)
+print(students,"r")
+print_filtered_footer(students)
