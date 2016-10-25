@@ -30,7 +30,7 @@ def input_students
     check = gets.chomp
     if check == "Y"
       students << {name: name, cohort: cohort.to_sym, age: age, sex: sex, hobby: hobby}
-      puts "Now we have #{students.count} students"
+      puts "Now we have #{students.count} student#{students.count == 1 ? "": "s"}"
     end
   end
   # return the array of students
