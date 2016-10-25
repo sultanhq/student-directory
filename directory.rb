@@ -24,7 +24,7 @@ def input_students
     sex = gets.chomp
     puts "What is #{name}'s favourite Hobby?"
     hobby = gets.chomp
-    puts "\nAre these details correct? Y/N"
+    puts "\nAre these details correct: ?"
     puts "Name: #{name}\nCohort: #{cohort}\nAge: #{age}\nGender: #{sex}\nFavourite hobby: #{hobby}"
     print "Y/N?"
     check = gets.chomp
@@ -43,32 +43,46 @@ def print_header
   puts "-------------".center(FORMAT_WIDTH)
 end
 
-def print_data(students,offset,filter)
+def print_data(array,offset,filter)
   puts "--------------------------------".center(FORMAT_WIDTH)
-  students.each.with_index(offset) do |student,index|
-    if filter == ""
-        puts "#{index}. #{student[:name]} (#{student[:cohort]} cohort), they are #{:age} years old and thier favourite hobby is #{:hobby})"
-    elsif filter =~ /^[A-z]+$/ # true if only word
-      @filter_type = "whose names begin with"
-      if student[:name] =~ /^#{filter}/i
-        puts "#{index}. #{student[:name]} (#{student[:cohort]} cohort)".center(FORMAT_WIDTH)
+  i = 0
+  until i >= array.length
+    array.each.with_index(offset) do |student,index| # requires the each removing
+      if filter == ""
+          puts "#{index}. #{student[:name]} (#{student[:cohort]} cohort), they are #{:age} years old and thier favourite hobby is #{:hobby})"
+      elsif filter =~ /^[A-z]+$/ # true if only word
+        @filter_type = "whose names begin with"
+        if student[:name] =~ /^#{filter}/i
+          puts "#{index}. #{student[:name]} (#{student[:cohort]} cohort)".center(FORMAT_WIDTH)
+        end
+      else
+        @filter_type = "whose names are shorter than"
+        if student[:name].length <= filter.to_i
+          puts "#{index}. #{student[:name]} (#{student[:cohort]} cohort)".center(FORMAT_WIDTH)
+        end
       end
-    else
-      @filter_type = "whose names are shorter than"
-      if student[:name].length <= filter.to_i
-        puts "#{index}. #{student[:name]} (#{student[:cohort]} cohort)".center(FORMAT_WIDTH)
-      end
+      i += 1
     end
   end
   @filter = filter
 end
 
-def print_footer(students,filter)
-  puts "Overall, we have #{students.count} great students#{filter}".center(FORMAT_WIDTH)
+def print_footer(array,filter)
+  puts "Overall, we have #{array.count} great array#{filter}".center(FORMAT_WIDTH)
 end
 
-def print_filtered_footer(students)
-  puts "These are the great students #{@filter_type} #{@filter}".center(FORMAT_WIDTH)
+def print_filtered_footer(array)
+  puts "These are students #{@filter_type} #{@filter}".center(FORMAT_WIDTH)
+end
+
+def print_by_sort(array,sort_key,offset,filter)
+  array_by_sort = array.sort_by {|v| v[sort_key]}
+  print_data(array_by_sort,offset,filter)
+end
+
+def print_by_sort_and_filter(array,sort_key,filter_key,offset,filter)
+  array_by_sort_and_filter = array.select { |hash| hash[sort_key.to_sym] == filter_key.to_sym}.sort_by {|v| v[sort_key.to_sym]}.sort_by {|v| v[:name]}
+  print_data(array_by_sort_and_filter,offset,filter)
 end
 # nothing happens until we call the methods:
 students = input_students
@@ -81,3 +95,5 @@ print_data(students,1,"r")
 print_filtered_footer(students)
 print_data(students,1,12)
 print_filtered_footer(students)
+print_by_sort(students,:cohort,1,"") # Stage 8 exercise 8
+print_by_sort_and_filter(students,"cohort","November",1,"")
