@@ -1,16 +1,41 @@
-FORMAT_WIDTH = 54
+FORMAT_WIDTH = 54 # A Constant (CONST) value
+
+def interactive_menu
+  system "clear"
+  @students = []
+  loop do
+    # system "clear"
+    # print menu
+    puts """\n
+    \n1. Input the students
+    \n2. Show the students
+    \n9. Exit"""
+    # get user input
+    selection = gets.chomp
+    # do action
+    case selection
+      when "1"
+        @students = input_students
+      when "2"
+        print_header
+        print_data(@students,1,"")
+        print_footer(@students,"")
+      when "9"
+        exit
+      else
+        puts "I don't know what you meant, try again"
+    end
+  end
+end
 
 def input_students
   puts "Please enter the names of the students"
   puts "To finish, just hit return twice"
   # crate an empty array
-  students = []
-  # get a name
-  # while the name is not empty, repeat this code
 
   while true do
     puts "Enter Name:"
-    name = gets.chomp
+    name = gets.chomp # get a name
     break if name.empty?
     puts "What cohort is #{name} on? (leave blank for November)"
     cohort = gets.chomp
@@ -29,12 +54,15 @@ def input_students
     print "Y/N?"
     check = gets.chomp
     if check == "Y"
-      students << {name: name, cohort: cohort.to_sym, age: age, sex: sex, hobby: hobby}
-      puts "Now we have #{students.count} student#{students.count == 1 ? "": "s"}"
+      @students << {name: name, cohort: cohort.to_sym, age: age, sex: sex, hobby: hobby}
+      puts "Now we have #{@students.count} student#{@students.count == 1 ? "": "s"}"
+    end
+    if @students.empty?
+      #####
     end
   end
   # return the array of students
-  students
+  @students
 end
 
 def print_header
@@ -68,7 +96,7 @@ def print_data(array,offset,filter)
 end
 
 def print_footer(array,filter)
-  puts "Overall, we have #{array.count} great array#{filter}".center(FORMAT_WIDTH)
+  puts "Overall, we have #{array.count} great students#{filter} ".center(FORMAT_WIDTH)
 end
 
 def print_filtered_footer(array)
@@ -85,15 +113,17 @@ def print_by_sort_and_filter(array,sort_key,filter_key,offset,filter)
   print_data(array_by_sort_and_filter,offset,filter)
 end
 # nothing happens until we call the methods:
-students = input_students
-print_header
-print_data(students,1,"")
-print_footer(students,"")
-print_data(students,1,"a")
-print_filtered_footer(students)
-print_data(students,1,"r")
-print_filtered_footer(students)
-print_data(students,1,12)
-print_filtered_footer(students)
-print_by_sort(students,:cohort,1,"") # Stage 8 exercise 8
-print_by_sort_and_filter(students,"cohort","November",1,"")
+# students = input_students
+# print_header
+# print_data(students,1,"")
+# print_footer(students,"")
+# print_data(students,1,"a")
+# print_filtered_footer(students)
+# print_data(students,1,"r")
+# print_filtered_footer(students)
+# print_data(students,1,12)
+# print_filtered_footer(students)
+# print_by_sort(students,:cohort,1,"") # Stage 8 exercise 8
+# print_by_sort_and_filter(students,"cohort","November",1,"")
+
+interactive_menu
