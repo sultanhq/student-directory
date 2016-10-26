@@ -1,11 +1,13 @@
 FORMAT_WIDTH = 54 # A Constant (CONST) value
 @students = []
 
+# ARGV.first
+
 def interactive_menu
   # system "clear"
   loop do
     print_menu
-    process(gets.chomp)# do action
+    process(STDIN.gets.chomp)# do action
   end
 end
 
@@ -46,9 +48,9 @@ def show_students
   end
 end
 
-def save_students
+def save_students(filename = "students.csv")
   #open a file
-  file = File.open("students.csv","w")
+  file = File.open(filename,"w")
   # iterate over the array of students
   @students.each do |student|
     student_data = [student[:name],student[:cohort],student[:age],student[:sex],student[:hobby]]
@@ -58,8 +60,8 @@ def save_students
   file.close
 end
 
-def load_students
-  file = File.open("students.csv","r")
+def load_students(filename = "students.csv")
+  file = File.open(filename,"r")
   file.readlines.each do |line|
     name, cohort, age, sex, hobby = line.chomp.split(',')
     @students << {name: name, cohort: cohort.to_sym, age: age, sex: sex, hobby: hobby}
@@ -67,37 +69,48 @@ def load_students
   file.close
 end
 
+def try_load_students
+  filename = ARGV.first # first argument from the command line
+  return if filename.nil? # get out of the method if it isn't given
+  if File.file?(filename) # if file exists (exists returns true for directory names, where file does not)
+    load_students(filename)
+    puts "Loaded #{@students.count} from #{filename}"
+  else
+    puts "Sorry, #{filename} doesn't exist."
+    exit #quit the program
+  end
+end
+
 def input_students
   puts "Please enter the names of the students"
   puts "To finish, just hit return twice"
-  # crate an empty array
-
   while true do
     puts "Enter Name:"
-    name = gets.chomp # get a name
+    name = STDIN.gets.chomp # get a name
     break if name.empty?
     puts "What cohort is #{name} on? (leave blank for November)"
-    cohort = gets.chomp
+    cohort = STDIN.gets.chomp
+
     if cohort.empty?
       cohort = "November"
       puts "November"
     end
+
     puts "What is #{name}'s age?"
-    age = gets.chomp
+    age = STDIN.gets.chomp
     puts "What is #{name}'s gender?"
-    sex = gets.chomp
+    sex = STDIN.gets.chomp
     puts "What is #{name}'s favourite Hobby?"
-    hobby = gets.chomp
+    hobby = STDIN.gets.chomp
     puts "\nAre these details correct: ?"
     puts "Name: #{name}\nCohort: #{cohort}\nAge: #{age}\nGender: #{sex}\nFavourite hobby: #{hobby}"
     print "Y/N?"
-    check = gets.chomp
+    check = STDIN.gets.chomp
 
     if check == "Y"
       @students << {name: name, cohort: cohort.to_sym, age: age, sex: sex, hobby: hobby}
       puts "Now we have #{@students.count} student#{@students.count == 1 ? "": "s"}"
     end
-
 
   end
   # return the array of students
@@ -105,7 +118,7 @@ def input_students
 end
 
 def print_header
-  # system "clear"
+  system "clear"
   puts "The students of Villains Academy".center(FORMAT_WIDTH)
   puts "-------------".center(FORMAT_WIDTH)
 end
@@ -115,19 +128,26 @@ def print_data(array, filter)
   i = 0
   until i >= array.length
     array.each.with_index(1) do |student,index| # requires the each removing
+
       if filter == ""
-          puts "#{index}. #{student[:name]} (#{student[:cohort]} cohort), they are #{student[:age]} years old and their favourite hobby is #{student[:hobby]}"
+        puts "#{index}. #{student[:name]} (#{student[:cohort]} cohort), they are #{student[:age]} years old and their favourite hobby is #{student[:hobby]}"
+
       elsif filter =~ /^[A-z]+$/ # true if only word
         @filter_type = "whose names begin with"
+
         if student[:name] =~ /^#{filter}/i
           puts "#{index}. #{student[:name]} (#{student[:cohort]} cohort)".center(FORMAT_WIDTH)
         end
+
       else
         @filter_type = "whose names are shorter than"
+
         if student[:name].length <= filter.to_i
           puts "#{index}. #{student[:name]} (#{student[:cohort]} cohort)".center(FORMAT_WIDTH)
         end
+
       end
+
       i += 1
     end
   end
@@ -151,18 +171,7 @@ def print_by_sort_and_filter(array, sort_key, filter_key, filter)
   array_by_sort_and_filter = array.select { |hash| hash[sort_key.to_sym] == filter_key.to_sym}.sort_by {|v| v[sort_key.to_sym]}.sort_by {|v| v[:name]}
   print_data(array_by_sort_and_filter, filter)
 end
-# nothing happens until we call the methods:
-# students = input_students
-# print_header
-# print_data(students,1,"")
-# print_footer(students,"")
-# print_data(students,1,"a")
-# print_filtered_footer(students)
-# print_data(students,1,"r")
-# print_filtered_footer(students)
-# print_data(students,1,12)
-# print_filtered_footer(students)
-# print_by_sort(students,:cohort,1,"") # Stage 8 exercise 8
-# print_by_sort_and_filter(students,"cohort","November",1,"")
 
+system "clear"
+try_load_students
 interactive_menu
