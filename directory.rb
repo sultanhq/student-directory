@@ -1,7 +1,6 @@
 FORMAT_WIDTH = 54 # A Constant (CONST) value
 @students = []
-
-# ARGV.first
+@filename = ARGV.first # first argument from the command line
 
 def interactive_menu
   # system "clear"
@@ -33,8 +32,8 @@ def print_menu
   puts """
   1. Input the students
   2. Show the students
-  3. Save the list to students.csv
-  4. Load the list from students.csv
+  3. Save the list to #{@filename}
+  4. Load the list from #{@filename}
   9. Exit"""
 end
 
@@ -70,13 +69,15 @@ def load_students(filename = "students.csv")
 end
 
 def try_load_students
-  filename = ARGV.first # first argument from the command line
-  return if filename.nil? # get out of the method if it isn't given
-  if File.file?(filename) # if file exists (exists returns true for directory names, where file does not)
-    load_students(filename)
-    puts "Loaded #{@students.count} from #{filename}"
+  if @filename.nil? # get out of the method if it isn't given
+    @filename = "students.csv"
+    return
+  end
+  if File.file?(@filename) # if file exists (exists returns true for directory names, where file does not)
+    load_students(@filename)
+    puts "Loaded #{@students.count} from #{@filename}"
   else
-    puts "Sorry, #{filename} doesn't exist."
+    puts "Sorry, #{@filename} doesn't exist."
     exit #quit the program
   end
 end
