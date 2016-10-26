@@ -71,6 +71,8 @@ end
 def try_load_students
   if @filename.nil? # get out of the method if it isn't given
     @filename = "students.csv"
+    load_students(@filename)
+    puts "Loaded #{@students.count} from #{@filename}"
     return
   end
   if File.file?(@filename) # if file exists (exists returns true for directory names, where file does not)
