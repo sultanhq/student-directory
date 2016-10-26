@@ -15,6 +15,10 @@ def process(selection)
       input_students
     when "2"
       show_students
+    when "3"
+      save_students
+    when "4"
+      load_students
     when "9"
       exit
     else
@@ -27,6 +31,8 @@ def print_menu
   puts """
   1. Input the students
   2. Show the students
+  3. Save the list to students.csv
+  4. Load the list from students.csv
   9. Exit"""
 end
 
@@ -38,6 +44,27 @@ def show_students
     print_data(@students,"")
     print_footer(@students,"")
   end
+end
+
+def save_students
+  #open a file
+  file = File.open("students.csv","w")
+  # iterate over the array of students
+  @students.each do |student|
+    student_data = [student[:name],student[:cohort],student[:age],student[:sex],student[:hobby]]
+    csv_line  = student_data.join(",")
+    file.puts csv_line
+  end
+  file.close
+end
+
+def load_students
+  file = File.open("students.csv","r")
+  file.readlines.each do |line|
+    name, cohort, age, sex, hobby = line.chomp.split(',')
+    @students << {name: name, cohort: cohort.to_sym, age: age, sex: sex, hobby: hobby}
+  end
+  file.close
 end
 
 def input_students
