@@ -1,9 +1,9 @@
-FORMAT_WIDTH = 54 # A Constant (CONST) value
+FORMAT_WIDTH = 80 # A Constant (CONST) value
 @students = []
 @filename = ARGV.first # first argument from the command line
 
 def interactive_menu
-  # system "clear"
+  # clear_screen
   loop do
     print_menu
     process(STDIN.gets.chomp)# do action
@@ -17,12 +17,22 @@ def process(selection)
     when "2"
       show_students
     when "3"
-      save_students
+      save_students(@filename)
     when "4"
-      load_students
+      if @filename.nil? || @filename == ""
+        print "Please enter filename to open: "
+        @filename = STDIN.gets.chomp
+      else
+        print "Please enter filename to open: "
+        @filename = STDIN.gets.chomp
+      end
+      file_load_check(@filename)
     when "9"
+      clear_screen
+      puts "Goodbye."
       exit
     else
+      clear_screen
       puts "I don't know what you meant, try again"
   end
 end
@@ -32,56 +42,91 @@ def print_menu
   puts """
   1. Input the students
   2. Show the students
-  3. Save the list to #{@filename}
-  4. Load the list from #{@filename}
+  3. Save the list #{@filename.nil? || @filename == "" ? "" : "to" } #{@filename}
+  4. Load a list
   9. Exit"""
 end
 
 def show_students
   if @students.empty?
+    clear_screen
     puts "You have no students yet :-("
   else
     print_header
-    print_data(@students,"")
-    print_footer(@students,"")
+    print_data(@students)
+    print_footer(@students)
   end
 end
 
-def save_students(filename = "students.csv")
-  #open a file
-  file = File.open(filename,"w")
-  # iterate over the array of students
-  @students.each do |student|
-    student_data = [student[:name],student[:cohort],student[:age],student[:sex],student[:hobby]]
-    csv_line  = student_data.join(",")
-    file.puts csv_line
+def save_students(filename)
+  if @students.empty?
+    clear_screen
+    puts "No data to save, please input data before attempting to save"
+  else
+    while @filename == nil || @filename == ""
+      print "Please enter filename to save: "
+      filename = STDIN.gets.chomp
+      @filename = filename
+    end
+    file = File.open(filename,"w")
+    @students.each do |student|
+      student_data = [student[:name],student[:cohort],student[:age],student[:sex],student[:hobby]]
+      csv_line  = student_data.join(",")
+      file.puts csv_line
+    end
+    clear_screen
+    puts "Save #{@students.count} to #{@filename}"
+    file.close
   end
-  file.close
 end
 
-def load_students(filename = "students.csv")
+def load_students(filename)
   file = File.open(filename,"r")
+  @students.clear
   file.readlines.each do |line|
     name, cohort, age, sex, hobby = line.chomp.split(',')
-    @students << {name: name, cohort: cohort.to_sym, age: age, sex: sex, hobby: hobby}
+    students_to_array(name,cohort,age,sex,hobby)
   end
   file.close
+  clear_screen
+  puts "Loaded #{@students.count} from #{@filename}"
 end
 
-def try_load_students
-  if @filename.nil? # get out of the method if it isn't given
-    @filename = "students.csv"
-    load_students(@filename)
-    puts "Loaded #{@students.count} from #{@filename}"
-    return
-  end
+def startup
+  return if @filename.nil? # get out of the method if it isn't given
   if File.file?(@filename) # if file exists (exists returns true for directory names, where file does not)
     load_students(@filename)
-    puts "Loaded #{@students.count} from #{@filename}"
   else
-    puts "Sorry, #{@filename} doesn't exist."
+    load_fail(@filename)
     exit #quit the program
   end
+end
+
+def clear_screen
+  system "clear"
+end
+
+def file_load_check(filename)
+  return if filename.nil? # get out of the method if it isn't given
+
+  if File.file?(filename) # if file exists (exists returns true for directory names, where file does not)
+    load_students(filename)
+    if File.size(filename) <= 0
+        puts "file empty, please enter new filename"
+        @filename = nil
+    end
+  else
+    load_fail(filename)
+  end
+end
+
+def load_fail(filename)
+  puts "Sorry, #{filename} file doesn't exist!."
+  @filename.clear
+end
+
+def students_to_array(name,cohort,age,sex,hobby)
+  @students << {name: name, cohort: cohort.to_sym, age: age, sex: sex, hobby: hobby}
 end
 
 def input_students
@@ -105,76 +150,48 @@ def input_students
     sex = STDIN.gets.chomp
     puts "What is #{name}'s favourite Hobby?"
     hobby = STDIN.gets.chomp
+    clear_screen
+
     puts "\nAre these details correct: ?"
+
     puts "Name: #{name}\nCohort: #{cohort}\nAge: #{age}\nGender: #{sex}\nFavourite hobby: #{hobby}"
-    print "Y/N?"
-    check = STDIN.gets.chomp
+    print "\nY/N?"
+    check = STDIN.gets.chomp.upcase
 
     if check == "Y"
-      @students << {name: name, cohort: cohort.to_sym, age: age, sex: sex, hobby: hobby}
-      puts "Now we have #{@students.count} student#{@students.count == 1 ? "": "s"}"
+      students_to_array(name,cohort,age,sex,hobby)
+      student_count
     end
-
   end
-  # return the array of students
-  @students
+  clear_screen
+  student_count
+end
+
+def student_count
+  puts "Now we have #{@students.count} student#{@students.count == 1 ? "": "s"}"
 end
 
 def print_header
-  system "clear"
+  clear_screen
   puts "The students of Villains Academy".center(FORMAT_WIDTH)
   puts "-------------".center(FORMAT_WIDTH)
 end
 
-def print_data(array, filter)
+def print_data(array)
   puts "--------------------------------".center(FORMAT_WIDTH)
   i = 0
   until i >= array.length
     array.each.with_index(1) do |student,index| # requires the each removing
-
-      if filter == ""
-        puts "#{index}. #{student[:name]} (#{student[:cohort]} cohort), they are #{student[:age]} years old and their favourite hobby is #{student[:hobby]}"
-
-      elsif filter =~ /^[A-z]+$/ # true if only word
-        @filter_type = "whose names begin with"
-
-        if student[:name] =~ /^#{filter}/i
-          puts "#{index}. #{student[:name]} (#{student[:cohort]} cohort)".center(FORMAT_WIDTH)
-        end
-
-      else
-        @filter_type = "whose names are shorter than"
-
-        if student[:name].length <= filter.to_i
-          puts "#{index}. #{student[:name]} (#{student[:cohort]} cohort)".center(FORMAT_WIDTH)
-        end
-
-      end
-
+      puts "#{index}. #{student[:name]} (#{student[:cohort]} cohort), they are #{student[:age]} years old and their favourite hobby is #{student[:hobby]}"
       i += 1
     end
   end
-  @filter = filter
 end
 
-def print_footer(array,filter)
-  puts "Overall, we have #{array.count} great student#{@students.count == 1 ? "": "s"}#{filter} ".center(FORMAT_WIDTH)
+def print_footer(array)
+  puts "Overall, we have #{array.count} great student#{@students.count == 1 ? "": "s"}".center(FORMAT_WIDTH)
 end
 
-def print_filtered_footer(array)
-  puts "These are students #{@filter_type} #{@filter}".center(FORMAT_WIDTH)
-end
-
-def print_by_sort(array, sort_key, filter)
-  array_by_sort = array.sort_by {|v| v[sort_key]}
-  print_data(array_by_sort,filter)
-end
-
-def print_by_sort_and_filter(array, sort_key, filter_key, filter)
-  array_by_sort_and_filter = array.select { |hash| hash[sort_key.to_sym] == filter_key.to_sym}.sort_by {|v| v[sort_key.to_sym]}.sort_by {|v| v[:name]}
-  print_data(array_by_sort_and_filter, filter)
-end
-
-system "clear"
-try_load_students
+clear_screen
+startup
 interactive_menu
