@@ -194,4 +194,5 @@ end
 
 clear_screen
 startup
+puts "Running #{$0}".rjust(80)
 interactive_menu
