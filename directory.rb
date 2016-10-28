@@ -68,26 +68,26 @@ def save_students(filename)
       filename = STDIN.gets.chomp
       @filename = filename
     end
-    file = File.open(filename,"w")
-    @students.each do |student|
-      student_data = [student[:name],student[:cohort],student[:age],student[:sex],student[:hobby]]
-      csv_line  = student_data.join(",")
-      file.puts csv_line
+    File.open(filename,"w")do |file|
+      @students.each do |student|
+        student_data = [student[:name],student[:cohort],student[:age],student[:sex],student[:hobby]]
+        csv_line  = student_data.join(",")
+        file.puts csv_line
+      end
     end
     clear_screen
     puts "Save #{@students.count} to #{@filename}"
-    file.close
   end
 end
 
 def load_students(filename)
-  file = File.open(filename,"r")
   @students.clear
-  file.readlines.each do |line|
-    name, cohort, age, sex, hobby = line.chomp.split(',')
-    students_to_array(name,cohort,age,sex,hobby)
+  File.open(filename,"r") do |file|
+    file.readlines.each do |line|
+      name, cohort, age, sex, hobby = line.chomp.split(',')
+      students_to_array(name,cohort,age,sex,hobby)
+    end
   end
-  file.close
   clear_screen
   puts "Loaded #{@students.count} from #{@filename}"
 end
