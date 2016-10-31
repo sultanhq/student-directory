@@ -1,6 +1,9 @@
 FORMAT_WIDTH = 80 # A Constant (CONST) value
 @students = []
 @filename = ARGV.first # first argument from the command line
+require 'csv'
+
+
 
 def interactive_menu
   # clear_screen
@@ -68,12 +71,9 @@ def save_students(filename)
       filename = STDIN.gets.chomp
       @filename = filename
     end
-    File.open(filename,"w")do |file|
-      @students.each do |student|
-        student_data = [student[:name],student[:cohort],student[:age],student[:sex],student[:hobby]]
-        csv_line  = student_data.join(",")
-        file.puts csv_line
-      end
+    # File.open(filename,"w")do |file|
+    CSV.open(filename, "wb") do |csv_row|
+      @students.each { |student| csv_row << student.values }
     end
     clear_screen
     puts "Save #{@students.count} to #{@filename}"
@@ -82,12 +82,16 @@ end
 
 def load_students(filename)
   @students.clear
-  File.open(filename,"r") do |file|
-    file.readlines.each do |line|
-      name, cohort, age, sex, hobby = line.chomp.split(',')
-      students_to_array(name,cohort,age,sex,hobby)
-    end
+  CSV.foreach(@filename) do |row|
+    name, cohort, age, sex, hobby = row
+        students_to_array(name,cohort,age,sex,hobby)
   end
+  # File.open(filename,"r") do |file|
+  #   file.readlines.each do |line|
+  #     name, cohort, age, sex, hobby = line.chomp.split(',')
+  #     students_to_array(name,cohort,age,sex,hobby)
+  #   end
+  # end
   clear_screen
   puts "Loaded #{@students.count} from #{@filename}"
 end
@@ -103,7 +107,7 @@ def startup
 end
 
 def clear_screen
-  system "clear"
+  # system "clear"
 end
 
 def file_load_check(filename)
@@ -137,8 +141,8 @@ def input_students
     name = STDIN.gets.chomp # get a name
     break if name.empty?
     puts "What cohort is #{name} on? (leave blank for November)"
-    cohort = STDIN.gets.chomp
 
+    cohort = STDIN.gets.chomp
     if cohort.empty?
       cohort = "November"
       puts "November"
